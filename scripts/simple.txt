@@ -1,0 +1,13 @@
+help
+insert 50
+yana
+30
+2
+30000
+2026-05-03
+DIRECTOR
+REGULAR
+n
+show
+save
+exit

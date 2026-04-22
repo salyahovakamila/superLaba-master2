@@ -1,8 +1,8 @@
 package client.validation;
 
-import common.models.Worker;
-import common.models.Coordinates;
-import common.models.Organization;
+import models.Worker;
+import models.Coordinates;
+import models.Organization;
 
 //Валидатор входных данных.
 
@@ -40,13 +40,11 @@ public class InputValidator {
       //Валидирует координаты.
 
     private static void validateCoordinates(Coordinates coords) throws ValidationException {
-        // X должен быть > -764 (по условию лабораторной)
         if (coords.getX() <= -764) {
             throw new ValidationException("X должен быть больше -764");
         }
 
-        // Y может быть null, но если есть — проверяем
-        if (coords.getY() != null && coords.getY() <= -764) {
+        if (coords.getY() <= -764) {
             throw new ValidationException("Y должен быть больше -764");
         }
     }
@@ -59,7 +57,7 @@ public class InputValidator {
         }
 
         // Количество сотрудников: если есть, должно быть > 0
-        if (org.getEmployeesCount() != null && org.getEmployeesCount() <= 0) {
+        if (org.getEmployeesCount() <= 0) {
             throw new ValidationException("Количество сотрудников должно быть больше 0");
         }
     }

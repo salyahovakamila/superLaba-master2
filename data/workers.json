@@ -1,6 +1,1 @@
-[
-  {"id":1,"name":"bob","coordinates":{"x":4,000000,"y":7,000000},"creationDate":"2026-03-20T13:51:00.965454+03:00[Europe/Moscow]","salary":6728123.0,"endDate":null,"position":"DIRECTOR","status":"FIRED","organization":null},
-  {"id":2,"name":"jam","coordinates":{"x":23923,000000,"y":424224,000000},"creationDate":"2026-03-20T13:51:00.965702+03:00[Europe/Moscow]","salary":6756.89,"endDate":null,"position":"HUMAN_RESOURCES","status":"HIRED","organization":null},
-  {"id":3,"name":"Bublik","coordinates":{"x":24384,000000,"y":432234,000000},"creationDate":"2026-03-20T13:51:00.966455+03:00[Europe/Moscow]","salary":5000.0,"endDate":null,"position":"ENGINEER","status":"REGULAR","organization":{"annualTurnover":467885,"employeesCount":3,"type":"PUBLIC"}},
-  {"id":4,"name":"yana","coordinates":{"x":30,000000,"y":2,000000},"creationDate":"2026-03-20T13:51:03.059542+03:00[Europe/Moscow]","salary":30000.0,"endDate":"2026-05-03","position":"DIRECTOR","status":"REGULAR","organization":null}
-]
+[]

@@ -1,0 +1,20 @@
+package common;
+
+public enum CommandType {
+    HELP,
+    INFO,
+    SHOW,
+    INSERT,
+    UPDATE,
+    REMOVE_KEY,
+    CLEAR,
+    EXIT,
+    REMOVE_LOWER,
+    REPLACE_IF_LOWER,
+    REMOVE_LOWER_KEY,
+    AVERAGE_OF_SALARY,
+    FILTER_GREATER_THAN_STATUS,
+    PRINT_FIELD_DESCENDING_END_DATE,
+    EXECUTE_SCRIPT,
+    SAVE
+}

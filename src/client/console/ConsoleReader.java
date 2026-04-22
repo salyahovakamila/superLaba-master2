@@ -1,5 +1,7 @@
 package client.console;
+
 import java.util.Scanner;
+
 public class ConsoleReader {
     private final Scanner scanner;
     public ConsoleReader(){
@@ -23,8 +25,5 @@ public class ConsoleReader {
             }
             System.out.println("Ввод не может быть пустым. Попробуйте снова.");
         }
-    }
-    public void close(){
-        scanner.close();
     }
 }

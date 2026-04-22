@@ -1,9 +1,9 @@
 help
-insert 50
-yana
+insert 80
+tsd
 30
 2
-30000
+8000
 2026-05-03
 DIRECTOR
 REGULAR

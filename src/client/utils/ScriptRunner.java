@@ -50,7 +50,7 @@ public class ScriptRunner {
         runningScripts.add(absolutePath);
 
         try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
-            System.out.println("=== ВЫПОЛНЕНИЕ СКРИПТА: " + filename + " ===");
+            System.out.println("ВЫПОЛНЕНИЕ СКРИПТА: " + filename);
 
             String line;
             int lineNumber = 0;
@@ -96,7 +96,7 @@ public class ScriptRunner {
                 }
             }
 
-            System.out.println("=== СКРИПТ ЗАВЕРШЕН ===\n");
+            System.out.println("СКРИПТ ЗАВЕРШЕН\n");
 
         } catch (FileNotFoundException e) {
             System.out.println("Ошибка: файл не найден - " + e.getMessage());

@@ -46,7 +46,7 @@ public class ClientApp {
                 if (input == null || input.trim().isEmpty()){
                     continue;
                 }
-р
+
                 String cmdName = input.trim().toLowerCase().split("\\s+")[0];
                 if (cmdName.equals("exit")) {
                     System.out.println("До свидания!");

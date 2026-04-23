@@ -54,7 +54,7 @@ public class RequestSender {
 
         selector.selectedKeys().clear();
 
-        // Читаем длину
+
         readBuffer.clear();
         readBuffer.limit(4);
 
@@ -65,7 +65,6 @@ public class RequestSender {
                 throw new IOException("Сервер закрыл соединение");
             }
             if (read == 0) {
-                // Ждём ещё
                 Thread.yield();
                 continue;
             }
@@ -79,7 +78,7 @@ public class RequestSender {
             throw new IOException("Некорректный размер данных: " + dataLength);
         }
 
-        // Читаем данные
+
         readBuffer.clear();
         readBuffer.limit(dataLength);
 

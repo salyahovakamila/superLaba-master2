@@ -92,7 +92,7 @@ public class CommandParser {
                     .withKey(key)
                     .withWorker(worker)
                     .build();
-        } catch (ValidationException e) {  
+        } catch (ValidationException e) {  // ← теперь должно работать
             System.out.println("Ошибка валидации: " + e.getMessage());
             return null;
         }
@@ -376,87 +376,4 @@ public class CommandParser {
             default -> System.out.println(response.getMessage());
         }
     }
-
-    private CommandRequest buildRequestFromScript(String cmdName, String args, String[] lines) {
-        switch (cmdName) {
-            case "help": return new CommandRequest.Builder(CommandType.HELP).build();
-            case "info": return new CommandRequest.Builder(CommandType.INFO).build();
-            case "show": return new CommandRequest.Builder(CommandType.SHOW).build();
-            case "clear": return new CommandRequest.Builder(CommandType.CLEAR).build();
-            case "exit": return new CommandRequest.Builder(CommandType.EXIT).build();
-            case "average_of_salary": return new CommandRequest.Builder(CommandType.AVERAGE_OF_SALARY).build();
-            case "print_field_descending_end_date": return new CommandRequest.Builder(CommandType.PRINT_FIELD_DESCENDING_END_DATE).build();
-            case "remove_key":
-                if (args.isEmpty()) throw new IllegalArgumentException("Укажите ключ");
-                return new CommandRequest.Builder(CommandType.REMOVE_KEY).withKey(args).build();
-            case "remove_lower_key":
-                if (args.isEmpty()) throw new IllegalArgumentException("Укажите ключ");
-                return new CommandRequest.Builder(CommandType.REMOVE_LOWER_KEY).withKey(args).build();
-            case "filter_greater_than_status":
-                if (args.isEmpty()) throw new IllegalArgumentException("Укажите статус");
-                try {
-                    Status status = Status.valueOf(args.toUpperCase());
-                    return new CommandRequest.Builder(CommandType.FILTER_GREATER_THAN_STATUS).withStatus(status).build();
-                } catch (IllegalArgumentException e) {
-                    throw new IllegalArgumentException("Неверный статус");
-                }
-            case "insert":
-                if (args.isEmpty()) throw new IllegalArgumentException("Укажите ключ");
-                Worker insertWorker = readWorkerFromLines(lines, 1);
-                return new CommandRequest.Builder(CommandType.INSERT).withKey(args).withWorker(insertWorker).build();
-            case "update":
-                if (args.isEmpty()) throw new IllegalArgumentException("Укажите ID");
-                int id = Integer.parseInt(args);
-                Worker updateWorker = readWorkerFromLines(lines, 1);
-                updateWorker.setId(id);
-                return new CommandRequest.Builder(CommandType.UPDATE).withId(id).withWorker(updateWorker).build();
-            case "remove_lower":
-                Worker lowerWorker = readWorkerFromLines(lines, 1);
-                return new CommandRequest.Builder(CommandType.REMOVE_LOWER).withWorker(lowerWorker).build();
-            case "replace_if_lower":
-                if (args.isEmpty()) throw new IllegalArgumentException("Укажите ключ");
-                Worker replaceWorker = readWorkerFromLines(lines, 1);
-                return new CommandRequest.Builder(CommandType.REPLACE_IF_LOWER).withKey(args).withWorker(replaceWorker).build();
-            default:
-                System.out.println("Неизвестная команда: " + cmdName);
-                return null;
-        }
-    }
-
-    private Worker readWorkerFromLines(String[] lines, int startIndex) {
-        try {
-            int idx = startIndex;
-
-            String name = lines[idx++].trim();
-            double x = Double.parseDouble(lines[idx++].trim().replace(',', '.'));
-            Float y = Float.parseFloat(lines[idx++].trim().replace(',', '.'));
-            float salary = Float.parseFloat(lines[idx++].trim().replace(',', '.'));
-
-            String endDateStr = lines[idx++].trim();
-            LocalDate endDate = endDateStr.isEmpty() || endDateStr.equals("null") ? null : LocalDate.parse(endDateStr);
-
-            String positionStr = lines[idx++].trim();
-            Position position = positionStr.isEmpty() || positionStr.equals("null") ? null : Position.valueOf(positionStr.toUpperCase());
-
-            Status status = Status.valueOf(lines[idx++].trim().toUpperCase());
-
-            String hasOrg = lines[idx++].trim();
-            Organization organization = null;
-            if (hasOrg.equalsIgnoreCase("y") || hasOrg.equalsIgnoreCase("yes")) {
-                Integer turnover = Integer.parseInt(lines[idx++].trim());
-                long employees = Long.parseLong(lines[idx++].trim());
-                String typeStr = lines[idx++].trim();
-                OrganizationType type = typeStr.isEmpty() || typeStr.equals("null") ? null : OrganizationType.valueOf(typeStr.toUpperCase());
-                organization = new Organization(turnover, employees, type);
-            }
-
-            Coordinates coords = new Coordinates(x, y);
-            return new Worker(null, name, coords, salary, endDate, position, status, organization);
-
-        } catch (Exception e) {
-            throw new IllegalArgumentException("Ошибка чтения Worker из скрипта: " + e.getMessage());
-        }
-    }
-
-
 }

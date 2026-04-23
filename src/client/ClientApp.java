@@ -32,7 +32,6 @@ public class ClientApp {
         client = new TCPClient(Constants.HOST, Constants.PORT);
         requestSender = new RequestSender(client.getChannel());
         consoleReader = new ConsoleReader();
-        // ИЗМЕНЕНО: передаём requestSender в CommandParser
         commandParser = new CommandParser(requestSender);
         System.out.println("Подключено к серверу!");
         System.out.println("Введите 'help' для списка команд, 'exit' для выхода\n");
@@ -47,7 +46,14 @@ public class ClientApp {
                 if (input == null || input.trim().isEmpty()){
                     continue;
                 }
-                // ИЗМЕНЕНО: теперь parse отправляет на сервер
+р
+                String cmdName = input.trim().toLowerCase().split("\\s+")[0];
+                if (cmdName.equals("exit")) {
+                    System.out.println("До свидания!");
+                    running = false;
+                    break;
+                }
+
                 commandParser.parse(input);
             } catch (Exception e){
                 ErrorHandler.handle(e);
@@ -59,9 +65,6 @@ public class ClientApp {
     private void close() {
         System.out.println("Закрытие соединения...");
         try{
-            if (requestSender != null) {
-                requestSender.close();
-            }
             if (client != null && client.getSelector() != null && client.getSelector().isOpen()){
                 client.getSelector().close();
             }

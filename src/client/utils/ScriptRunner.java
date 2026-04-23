@@ -50,7 +50,7 @@ public class ScriptRunner {
         runningScripts.add(absolutePath);
 
         try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
-            System.out.println("ВЫПОЛНЕНИЕ СКРИПТА: " + filename);
+            System.out.println("=== ВЫПОЛНЕНИЕ СКРИПТА: " + filename + " ===");
 
             String line;
             int lineNumber = 0;
@@ -75,6 +75,13 @@ public class ScriptRunner {
                     continue;
                 }
 
+                if (cmdName.equals("exit")) {
+                    System.out.println("  Команда exit прервала скрипт");
+                    System.out.println("Завершение работы клиента...");
+                    System.exit(0);
+                    break;
+                }
+
                 try {
                     CommandRequest request = buildRequestFromScript(cmdName, args, reader);
                     if (request == null) continue;
@@ -83,17 +90,13 @@ public class ScriptRunner {
                     CommandResponse response = requestSender.receiveResponse();
                     commandParser.printResponse(response);
 
-                    if (cmdName.equals("exit")) {
-                        System.out.println("  Команда exit прервала скрипт");
-                        break;
-                    }
                 } catch (Exception e) {
                     System.out.println("  Ошибка в строке " + lineNumber + ": " + e.getMessage());
                     break;
                 }
             }
 
-            System.out.println("СКРИПТ ЗАВЕРШЕН \n");
+            System.out.println("=== СКРИПТ ЗАВЕРШЕН ===\n");
 
         } catch (FileNotFoundException e) {
             System.out.println("Ошибка: файл не найден - " + e.getMessage());
@@ -151,7 +154,6 @@ public class ScriptRunner {
     }
 
     private Worker readWorkerFromScript(BufferedReader reader) throws IOException {
-        // Читаем ровно столько строк, сколько нужно для Worker
         String name = readNonEmptyLine(reader);
         double x = Double.parseDouble(readNonEmptyLine(reader).replace(',', '.'));
         Float y = Float.parseFloat(readNonEmptyLine(reader).replace(',', '.'));

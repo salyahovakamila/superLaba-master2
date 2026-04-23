@@ -92,7 +92,7 @@ public class CommandParser {
                     .withKey(key)
                     .withWorker(worker)
                     .build();
-        } catch (ValidationException e) {  // ← теперь должно работать
+        } catch (ValidationException e) {  
             System.out.println("Ошибка валидации: " + e.getMessage());
             return null;
         }

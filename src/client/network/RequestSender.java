@@ -8,109 +8,61 @@ import common.SerializationHelper;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
-import java.nio.channels.Selector;
-import java.nio.channels.SelectionKey;
 
 public class RequestSender {
-    private final SocketChannel channel;
-    private final ByteBuffer writeBuffer;
-    private final ByteBuffer readBuffer;
-    private final Selector selector;
 
-    public RequestSender(SocketChannel channel) {
-        this.channel = channel;
-        this.writeBuffer = ByteBuffer.allocate(Constants.BUFFER_SIZE);
-        this.readBuffer = ByteBuffer.allocate(Constants.BUFFER_SIZE);
+    public CommandResponse sendAndReceive(CommandRequest request) throws IOException {
+        SocketChannel channel = null;
         try {
-            this.selector = Selector.open();
-            this.channel.configureBlocking(false);
-            this.channel.register(selector, SelectionKey.OP_READ);
-        } catch (IOException e) {
-            throw new RuntimeException("Ошибка создания селектора", e);
-        }
-    }
-
-    public void send(CommandRequest request) throws IOException {
-        byte[] requestBytes = SerializationHelper.serialize(request);
-
-        writeBuffer.clear();
-        writeBuffer.putInt(requestBytes.length);
-        writeBuffer.put(requestBytes);
-        writeBuffer.flip();
-
-        while (writeBuffer.hasRemaining()) {
-            channel.write(writeBuffer);
-        }
-        System.out.println("Запрос отправлен, размер: " + requestBytes.length);
-    }
-
-    public CommandResponse receiveResponse() throws IOException {
-        // Ожидаем готовности канала к чтению
-        selector.select(Constants.TIMEOUT_MS);
-
-        if (selector.selectedKeys().isEmpty()) {
-            throw new IOException("Таймаут ожидания ответа от сервера");
-        }
-
-        selector.selectedKeys().clear();
-
-
-        readBuffer.clear();
-        readBuffer.limit(4);
-
-        int bytesRead = 0;
-        while (bytesRead < 4) {
-            int read = channel.read(readBuffer);
-            if (read == -1) {
-                throw new IOException("Сервер закрыл соединение");
+            channel = TCPClient.connect();
+            // Отправка
+            byte[] requestBytes = SerializationHelper.serialize(request);
+            ByteBuffer writeBuffer = ByteBuffer.allocate(4 + requestBytes.length);
+            writeBuffer.putInt(requestBytes.length);
+            writeBuffer.put(requestBytes);
+            writeBuffer.flip();
+            while (writeBuffer.hasRemaining()) {
+                channel.write(writeBuffer);
             }
-            if (read == 0) {
-                Thread.yield();
-                continue;
+
+            // Приём ответа
+            ByteBuffer lengthBuffer = ByteBuffer.allocate(4);
+            long deadline = System.currentTimeMillis() + Constants.TIMEOUT_MS;
+            while (lengthBuffer.hasRemaining()) {
+                if (System.currentTimeMillis() > deadline) {
+                    throw new IOException("Таймаут чтения длины ответа");
+                }
+                int read = channel.read(lengthBuffer);
+                if (read == -1) throw new IOException("Сервер закрыл соединение");
+                if (read == 0) Thread.yield();
             }
-            bytesRead += read;
-        }
-
-        readBuffer.flip();
-        int dataLength = readBuffer.getInt();
-
-        if (dataLength <= 0 || dataLength > Constants.BUFFER_SIZE - 4) {
-            throw new IOException("Некорректный размер данных: " + dataLength);
-        }
-
-
-        readBuffer.clear();
-        readBuffer.limit(dataLength);
-
-        bytesRead = 0;
-        while (bytesRead < dataLength) {
-            int read = channel.read(readBuffer);
-            if (read == -1) {
-                throw new IOException("Сервер закрыл соединение");
+            lengthBuffer.flip();
+            int dataLength = lengthBuffer.getInt();
+            if (dataLength <= 0 || dataLength > Constants.BUFFER_SIZE) {
+                throw new IOException("Некорректный размер данных: " + dataLength);
             }
-            if (read == 0) {
-                Thread.yield();
-                continue;
+
+            ByteBuffer dataBuffer = ByteBuffer.allocate(dataLength);
+            deadline = System.currentTimeMillis() + Constants.TIMEOUT_MS;
+            while (dataBuffer.hasRemaining()) {
+                if (System.currentTimeMillis() > deadline) {
+                    throw new IOException("Таймаут чтения данных ответа");
+                }
+                int read = channel.read(dataBuffer);
+                if (read == -1) throw new IOException("Сервер закрыл соединение");
+                if (read == 0) Thread.yield();
             }
-            bytesRead += read;
-        }
+            dataBuffer.flip();
+            byte[] responseBytes = new byte[dataLength];
+            dataBuffer.get(responseBytes);
 
-        readBuffer.flip();
-        byte[] responseBytes = new byte[dataLength];
-        readBuffer.get(responseBytes);
-
-        CommandResponse response = SerializationHelper.deserialize(responseBytes, CommandResponse.class);
-        if (response == null) {
-            throw new IOException("Не удалось десериализовать ответ");
-        }
-
-        System.out.println("Ответ получен, тип: " + response.getType());
-        return response;
-    }
-
-    public void close() throws IOException {
-        if (selector != null && selector.isOpen()) {
-            selector.close();
+            CommandResponse response = SerializationHelper.deserialize(responseBytes, CommandResponse.class);
+            if (response == null) throw new IOException("Не удалось десериализовать ответ");
+            return response;
+        } finally {
+            if (channel != null && channel.isOpen()) {
+                channel.close();
+            }
         }
     }
 }

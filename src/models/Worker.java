@@ -102,15 +102,13 @@ public class Worker implements Comparable<Worker>, Serializable {  // ДОБАВ
     @Override
     public int compareTo(Worker other) {
         if (other == null) return 1;
-        if (this.status == null && other.status == null) return 0;
-        if (this.status == null) return -1;
-        if (other.status == null) return 1;
-        return this.status.compareTo(other.status);
+        int xCompare = Double.compare(this.coordinates.getX(), other.coordinates.getX());
+        if (xCompare != 0) return xCompare;
+        return Float.compare(this.coordinates.getY(), other.coordinates.getY());
     }
 
     @Override
     public String toString() {
-        return String.format(java.util.Locale.US, "Worker{id=%d, name='%s', salary=%.2f, status=%s}",
-                id, name, salary, status);
+        return String.format("Worker[id=%d, name=%s, pos=%s, salary=%.2f]", id, name, coordinates, salary);
     }
 }

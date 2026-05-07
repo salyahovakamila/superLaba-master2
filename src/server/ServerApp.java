@@ -2,46 +2,51 @@ package server;
 
 import server.commands.CommandExecutor;
 import server.io.FileManager;
-import server.network.TCPServer;
+import server.network.BlockingServer;
 import server.utils.Constants;
 import models.Worker;
 
 import java.util.HashMap;
 import java.util.Scanner;
+import java.util.logging.Logger;
 
 public class ServerApp {
-    private static TCPServer server;
+    private static final Logger logger = Logger.getLogger(ServerApp.class.getName());
+    private static BlockingServer server;
     private static CommandExecutor commandExecutor;
     private static HashMap<String, Worker> collection;
     private static boolean running = true;
 
     public static void main(String[] args) {
-        System.out.println("=== СЕРВЕР УПРАВЛЕНИЯ РАБОТНИКАМИ ===");
-
+        logger.info("=== СЕРВЕР УПРАВЛЕНИЯ РАБОТНИКАМИ ===");
         String fileName = System.getenv("WORKER_DATA");
         if (fileName == null) {
             fileName = Constants.DEFAULT_FILE_NAME;
-            System.out.println("Используется файл по умолчанию: " + fileName);
+            logger.info("Используется файл по умолчанию: " + fileName);
         }
 
         FileManager fileManager = new FileManager();
         collection = fileManager.loadFromFile(fileName);
-
-        System.out.println("Загружено работников: " + collection.size());
+        logger.info("Загружено работников: " + collection.size());
 
         commandExecutor = new CommandExecutor(collection, fileName);
 
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            System.out.println("\nСохранение коллекции...");
-            commandExecutor.saveCollection();
-        }));
-
         try {
-            server = new TCPServer(Constants.PORT, commandExecutor);
-            server.start();
+            server = new BlockingServer(Constants.PORT, commandExecutor);
+            Thread serverThread = new Thread(() -> {
+                try {
+                    server.start();
+                } catch (Exception e) {
+                    logger.severe("Критическая ошибка сервера: " + e.getMessage());
+                }
+            });
+            serverThread.setDaemon(true);
+            serverThread.start();
+
             handleServerConsole();
+
         } catch (Exception e) {
-            System.err.println("Ошибка запуска сервера: " + e.getMessage());
+            logger.severe("Ошибка инициализации сервера: " + e.getMessage());
             System.exit(1);
         }
     }

@@ -86,8 +86,7 @@ public class ScriptRunner {
                     CommandRequest request = buildRequestFromScript(cmdName, args, reader);
                     if (request == null) continue;
 
-                    requestSender.send(request);
-                    CommandResponse response = requestSender.receiveResponse();
+                    CommandResponse response = requestSender.sendAndReceive(request);
                     commandParser.printResponse(response);
 
                 } catch (Exception e) {

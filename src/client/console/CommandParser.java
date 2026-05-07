@@ -38,8 +38,7 @@ public class CommandParser {
             CommandRequest request = buildRequest(cmdName, args);
             if (request == null) return;
 
-            requestSender.send(request);
-            CommandResponse response = requestSender.receiveResponse();
+            CommandResponse response = requestSender.sendAndReceive(request);
             printResponse(response);
 
         } catch (IOException e) {
@@ -352,14 +351,8 @@ public class CommandParser {
             case INFO -> System.out.println(response.getMessage());
             case COLLECTION -> {
                 System.out.println(response.getMessage());
-                if (response.getWorkers() != null && !response.getWorkers().isEmpty()) {
-                    response.getWorkers().forEach(w -> System.out.println("  " + w));
-                }
             }
-            case COLLECTION_WITH_KEYS -> {
-                // Убираем дублирование - выводим только сообщение
-                System.out.println(response.getMessage());
-            }
+            case COLLECTION_WITH_KEYS -> System.out.println(response.getMessage());
             case AVERAGE -> {
                 if (response.getAverageSalary() != null) {
                     System.out.printf("Средняя зарплата: %.2f%n", response.getAverageSalary());
@@ -367,12 +360,7 @@ public class CommandParser {
                     System.out.println(response.getMessage());
                 }
             }
-            case DATES -> {
-                System.out.println(response.getMessage());
-                if (response.getDates() != null && !response.getDates().isEmpty()) {
-                    response.getDates().forEach(System.out::println);
-                }
-            }
+            case DATES -> System.out.println(response.getMessage());
             default -> System.out.println(response.getMessage());
         }
     }
